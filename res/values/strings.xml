@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ShapeDetection</string>
+    <string name="button">Take photo</string>
+
+</resources>
