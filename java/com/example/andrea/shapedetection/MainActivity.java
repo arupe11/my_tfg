@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
         Button button_cam = (Button) findViewById(R.id.button);
         button_cam.setOnClickListener(new View.OnClickListener() {
 
-            // @Override
+            @Override
             public void onClick(View v) {
                 Intent intent = new Intent (MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(intent, 0);
@@ -33,9 +33,9 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
-    /**De la actividad ACTION_VIDEO_CAPTURE se espera recibir un resultado, en este caso, el video.
-    Por eso se usa startActivityForResult. El resultado se recibe en onActivityResult(por defecto),
-    en forma de otro objeto Intent**/
+    //De la actividad ACTION_VIDEO_CAPTURE se espera recibir un resultado, en este caso, el video.
+    //Por eso se usa startActivityForResult. El resultado se recibe en onActivityResult(por defecto),
+    //en forma de otro objeto Intent
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         intent1.putExtra("image", bitmap); //Añado la imagen al intent1 y la llamo "image"
         startActivity(intent1);
     }
+
 }
 
 
