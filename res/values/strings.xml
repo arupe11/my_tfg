@@ -1,5 +1,13 @@
 <resources>
-    <string name="app_name">ShapeDetection</string>
-    <string name="button">Take photo</string>
+    <string name="app_name">MyApp</string>
+    <string name="welcome">¡Bienvenido!</string>
+    <string name="welcome1">Escoge un nivel.</string>
+    <string name="nivel1">Fácil</string>
+    <string name="nivel2">Intermedio</string>
+    <string name="nivel3">Difícil</string>
+    <string name="start">¡JUGAR!</string>
+    <string name="goback">VOLVER ATRÁS</string>
+    <string name="title_activity_reconocimiento">Reconocimiento</string>
+
 
 </resources>
