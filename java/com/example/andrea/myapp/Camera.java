@@ -40,7 +40,7 @@ public class Camera extends AppCompatActivity implements CameraBridgeViewBase.Cv
     public static String Hue = "";
     public static List<MatOfPoint> approxCurves;
     public static String tipo_figura;
-    public static int contador_triangulo, contador_cuadrado=0;
+    public static int contador_triangulo, contador_cuadrado, contador_rectangulo, contador_circulo=0;
 
     private Mat mRgba; //frame (se va actualizando todoel tiempo)
     public static Mat frame2;
@@ -128,53 +128,81 @@ public class Camera extends AppCompatActivity implements CameraBridgeViewBase.Cv
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
-        int x = (mRgba.cols()/2)-150;
-        int y = (mRgba.rows()/2)-300;
+        Mat mRgba_copy = mRgba.clone();
 
-
-        Rect roi = new Rect (x,y,300,300);
+        //Dibujar cuadrado ROI
+        int square_side = 300;
+        int x = (mRgba.cols()/2)-square_side/2;
+        int y = (mRgba.rows()/2)-square_side;
+        Rect roi = new Rect (x,y,square_side, square_side);
         Imgproc.rectangle(mRgba, new Point(roi.x, roi.y), new Point(roi.x + roi.width, roi.y + roi.height), new Scalar(0, 255, 0, 255), 5);
 
+        //Recortamos la imagen
+        Mat matROI = new Mat(mRgba_copy, roi);
 
-        //Encontrar los contornos. Cada contorno se almacena como un vector de puntos
+        //Encontrar los contornos de la imagen recortada
         List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-        contours = findContours(mRgba, contours);
-
-
+        contours = findContours(matROI, contours);
 
 
         //Detectamos la figura
-        tipo_figura = figureClasification(mRgba, contours);
-        String size_cont = Integer.toString(contours.size());
+        tipo_figura = figureClasification(matROI, contours);
 
         //Detectamos el color
         // String color = colorDetection(photo_original);
 
-     //   Imgproc.putText(mRgba, tipo_figura , new Point(100, 500), 3, 1, new Scalar(255, 0, 0, 255), 2);
 
-        if (isTriangle()==true){
-            contador_triangulo++;
+        switch (tipo_figura){
+            case "TRIANGULO":
+                contador_triangulo++;
+                break;
+            case "CUADRADO":
+                contador_cuadrado++;
+                break;
+            case "CIRCULO":
+                contador_circulo++;
+                break;
+            case "RECTANGULO":
+                contador_rectangulo++;
+                break;
+            default:
+                break;
         }
+
         if(contador_triangulo>=30) {
-            Imgproc.putText(mRgba, "TRIANGULO!!", new Point(100, 500), 3, 1, new Scalar(255, 0, 0, 255), 2);
+            Imgproc.putText(mRgba, "TRIANGULO", new Point(100, 500), 3, 1, new Scalar(255, 0, 0, 255), 2);
             if (contador_triangulo >= 40) { //ya lo ha detectado
-                contador_triangulo = 0;
-                esperar(2);
+                resetCounters();
+                esperar(1);
             }
         }
 
 
-        if (isSquare()==true){
-            contador_cuadrado++;
-        }
-        if(contador_cuadrado>=40) {
-                Imgproc.putText(mRgba, "CUADRADO!!", new Point(100, 500), 3, 1, new Scalar(255, 0, 0, 255), 2);
-                if (contador_cuadrado >= 50) { //ya lo ha detectado
-                    contador_cuadrado = 0;
-                    esperar(2);
+        if(contador_cuadrado>=30) {
+            Imgproc.putText(mRgba, "CUADRADO", new Point(100, 500), 3, 1, new Scalar(255, 0, 0, 255), 2);
+            if (contador_cuadrado >= 40) { //ya lo ha detectado
+                resetCounters();
+                esperar(1);
                 }
         }
 
+        if(contador_rectangulo>=30) {
+            Imgproc.putText(mRgba, "RECTANGULO", new Point(100, 500), 3, 1, new Scalar(255, 0, 0, 255), 2);
+            if (contador_rectangulo >= 40) { //ya lo ha detectado
+                resetCounters();
+                esperar(1);
+            }
+        }
+
+        if(contador_circulo>=30) {
+            Imgproc.putText(mRgba, "CIRCULO", new Point(100, 500), 3, 1, new Scalar(255, 0, 0, 255), 2);
+            if (contador_circulo >= 40) { //ya lo ha detectado
+                resetCounters();
+                esperar(1);
+            }
+        }
+
+        Imgproc.drawContours(mRgba, contours, -1, new Scalar(255, 0, 0, 255), 2);
 
 
         // RecognisedFrame(mRgba);
@@ -240,7 +268,6 @@ public class Camera extends AppCompatActivity implements CameraBridgeViewBase.Cv
         }
 
 
-        Imgproc.drawContours(mat_img, contours, maxAreaIdx, new Scalar(255, 0, 0, 255), 2);
 
 
         /**CLASIFICACIÓN DEL CONTORNO**/
@@ -248,16 +275,19 @@ public class Camera extends AppCompatActivity implements CameraBridgeViewBase.Cv
         if (approxCurve2f.total() == 4) {
             double aspectratio = rotrect.size.width / rotrect.size.height;
             if (0.80 <= aspectratio && aspectratio <= 1.20) {
-                figure = "CUADRADO"; //cuadrado
+                figure = "CUADRADO";
+            } else {
+                figure = "RECTANGULO";
             }
-
-        } else {
-            figure = "RECTANGULO";
         }
 
 
-        if (approxCurve2f.total() == 3) {
+        else if (approxCurve2f.total() == 3) {
             figure = "TRIANGULO";
+        }
+
+        else if (approxCurve2f.total() > 3) {
+            figure = "CIRCULO";
         }
 
 
@@ -316,6 +346,38 @@ public class Camera extends AppCompatActivity implements CameraBridgeViewBase.Cv
         }
     }
 
+    static boolean isRectangle () {
+
+        String re = "RECTANGLE";
+
+
+        if (tipo_figura == re ){
+            return true;
+        } else{
+            return false;
+        }
+    }
+
+    static boolean isCircle () {
+
+        String ci = "CIRCULO";
+
+
+        if (tipo_figura == ci ){
+            return true;
+        } else{
+            return false;
+        }
+    }
+
+
+    static void resetCounters () {
+
+        contador_triangulo = 0;
+        contador_cuadrado = 0;
+        contador_rectangulo = 0;
+        contador_circulo = 0;
+    }
 
     public void esperar (int segundos) {
         try {
